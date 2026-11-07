@@ -1,12 +1,14 @@
 import math
+from typing import Optional
 
 from mininet.clean import cleanup
 from mininet.cli import CLI
 from mininet.net import Containernet
+from mininet.node import RemoteController
+from mininet.link import TCIntf
 from mininet.log import setLogLevel, info
+from mininet.util import custom
 
-# TODO: Link setup
-# TODO: Controller setup
 # TODO: Reconsider addressing
 
 def setup_network(
@@ -15,8 +17,25 @@ def setup_network(
     client_image: str = "ubuntu:trusty",
     server_image: str = "ubuntu:trusty",
     servers_per_access_switch: int = 2,
+    link_bandwidth_mbit: Optional[int] = None,
+    link_delay: Optional[str] = None,
+    controller_address: str = "127.0.0.1",
+    controller_port: int = 6653,
 ):
-    net = Containernet()
+    net = Containernet(
+        controller = custom(
+            RemoteController,
+            ip = controller_address,
+            port = controller_port,
+        ),
+        intf = custom(
+            TCIntf,
+            bw = link_bandwidth_mbit,
+            delay = link_delay,
+        )
+    )
+    info('*** Adding controller\n')
+    net.addController()
 
     info('*** Adding switches\n')
     s1 = net.addSwitch("s1") # Core
@@ -85,7 +104,7 @@ def setup_network(
 if __name__ == "__main__":
     setLogLevel("info")
 
-    net = setup_network()
+    net = setup_network(link_bandwidth_mbit=2)
     
     info('*** Starting network\n')
     net.start()

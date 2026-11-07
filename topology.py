@@ -1,4 +1,5 @@
 import math
+import sys
 from typing import Optional
 
 from mininet.clean import cleanup
@@ -14,8 +15,8 @@ from mininet.util import custom
 def setup_network(
     client_count: int = 2,
     server_count: int = 4,
-    client_image: str = "ubuntu:trusty",
-    server_image: str = "ubuntu:trusty",
+    client_image: str = "ubuntu:resolute",
+    server_image: str = "ubuntu:resolute",
     servers_per_access_switch: int = 2,
     link_bandwidth_mbit: Optional[int] = None,
     link_delay: Optional[str] = None,
@@ -102,9 +103,96 @@ def setup_network(
 
 
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        add_help = True,
+    )
+
+    client_group = parser.add_argument_group(
+        "Client config options"
+    )
+    client_group.add_argument(
+        "--client-count",
+        type = int,
+        default = 2,
+        help = "Number of client hosts to launch",
+    )
+    client_group.add_argument(
+        "--client-image",
+        type = str,
+        default = "ubuntu:resolute",
+        help = "Docker image to use for client hosts",
+    )
+
+    server_group = parser.add_argument_group(
+        "Server config options"
+    )
+    server_group.add_argument(
+        "--server-count",
+        type = int,
+        default = 4,
+        help = "Number of server hosts to launch",
+    )
+    server_group.add_argument(
+        "--server-image",
+        type = str,
+        default = "ubuntu:resolute",
+        help = "Docker image to use for server hosts",
+    )
+    server_group.add_argument(
+        "--servers-per-access-switch",
+        type = int,
+        default = 2,
+        help = "Maximum number of server hosts to attach to a single access layer switch",
+    )
+
+    link_group = parser.add_argument_group(
+        "Link config options"
+    )
+    link_group.add_argument(
+        "--link-bw_mbit",
+        type = int,
+        help = "Link bandwidth in Mbit",
+    )
+    link_group.add_argument(
+        "--link-delay",
+        type = str,
+        help = "Link delay, [us, ns, ms] supported as units",
+    )
+
+    controller_group = parser.add_argument_group(
+        "Controller config options"
+    )   
+    controller_group.add_argument(
+        "--controller-addr",
+        type = str,
+        default = "127.0.0.1",
+        help = "OpenFlow controller address",
+    )
+    
+    controller_group.add_argument(
+        "--controller-port",
+        type = int,
+        default = 6653,
+        help = "OpenFlow controller TCP port",
+    )
+
+    args = parser.parse_args()
+
     setLogLevel("info")
 
-    net = setup_network(link_bandwidth_mbit=2)
+    net = setup_network(
+        client_count = args.client_count,
+        server_count = args.server_count,
+        client_image = args.client_image,
+        server_image = args.server_image,
+        servers_per_access_switch = args.servers_per_access_switch,
+        link_bandwidth_mbit = args.link_bw_mbit,
+        link_delay = args.link_delay,
+        controller_address = args.controller_addr,
+        controller_port = args.controller_port,
+    )
     
     info('*** Starting network\n')
     net.start()

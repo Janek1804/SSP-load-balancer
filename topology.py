@@ -1,5 +1,4 @@
 import math
-import sys
 from typing import Optional
 
 from mininet.clean import cleanup

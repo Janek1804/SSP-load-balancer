@@ -153,6 +153,7 @@ activemq-data/
 .env
 .envrc
 .venv
+activate-ssp.sh
 env/
 venv/
 ENV/

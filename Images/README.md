@@ -1,26 +1,24 @@
 # Obrazy Docker klienta i serwera
 
-## 1. Struktura katalogu Images
+### 1. Struktura katalogu Images
 
 ```text
 Images
 ├── client/
-│   ├── Dockerfile        # obraz klienta; bash do współpracy z Containernet
+│   ├── Dockerfile.client # obraz klienta; bash do współpracy z Containernet
 │   ├── requirements.txt  # aiohttp
 │   └── load.py           # asynchroniczny generator HTTP/HTTPS
 ├── server/
-│   ├── Dockerfile        # obraz serwera
+│   ├── Dockerfile.client # obraz serwera
 │   ├── requirements.txt  # gunicorn, flask
 │   ├── start.sh          # uruchamia Flaska; obsługuje certyfikat TLS
 │   └── flask_app.py      # /health, /work, /stats
-├── topology/
-│   └── containernet_example.py
 ├── certs/                 # certyfikaty lokalne (poza repo)
 ├── results/               # logi CSV (poza repo)
 └── compose.yaml           # test obu obrazów bez SDN
 ```
 
-## 2. Wstęp
+### 2. Wstęp
 
 - **Image** zawiera jedynie runtime, narzędzia (`bash`, `ip`, `ping`, `curl`) i kod
   aplikacji. Nie wbudowuje limitów CPU/RAM ani adresu IP.
@@ -60,7 +58,7 @@ odpowiedzi oraz 16 MiB body na żądanie.
 - `GET /work` i `POST /work` — żądanie pracy; wynik JSON z `server_id`,
   `processing_ms` i parametrami profilu. Każda odpowiedź ma `X-Server-Id`.
 
-## 5. Budowanie obrazów
+### 5. Budowanie obrazów
 
 W katalogu `Images`:
 
@@ -110,7 +108,7 @@ Zwraca kod 1, jeśli wystąpi jakikolwiek błąd (nawet dla pojedyńczego żąda
 --summary       opcjonalne podsumowanie JSON
 ```
 
-### Dodanie klienta i serwera do topologii
+### 8. Dodanie klienta i serwera do topologii
 
 ```python
 

@@ -1,0 +1,6 @@
+.git
+results
+certs
+__pycache__
+.pytest_cache
+*.pyc

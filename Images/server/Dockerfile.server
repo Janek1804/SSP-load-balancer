@@ -1,0 +1,54 @@
+FROM python:3.12-slim
+
+# SERVER_PORT - port, na którym serwer HTTP nasłuchuje (domyślnie 8080).
+
+# WORKERS - liczba procesów roboczych Gunicorn. Każdy worker może
+# obsługiwać jedno żądanie jednocześnie (domyślnie 2).
+
+# SERVER_TIMEOUT - czas w sekundach, po którym Gunicorn może zrestartować
+# workera, jeśli ten przestaje odpowiadać (domyślnie 60).
+
+# WORK_CPU_MS - ilość czasu procesora (w ms) zużywana na obsługę jednego
+# żądania. Określa obciążenie CPU, a nie całkowity czas odpowiedzi.
+# Mniejszy przydział CPU może powodować szybsze przeciążenie serwera.
+
+# WORK_MEM_MB - ilość pamięci RAM (w MiB) alokowanej na pojedyncze żądanie.
+# Nadmierne zużycie pamięci może doprowadzić do zakończenia procesu przez OOM.
+
+# WORK_IO_KB - ilość danych (w KiB) zapisywanych na dysk podczas obsługi
+# pojedynczego żądania.
+
+# WORK_SLEEP_MS - sztuczne opóźnienie obsługi żądania (w ms), symulujące
+# np. oczekiwanie na bazę danych lub zewnętrzny serwis.
+# W tym czasie worker pozostaje zajęty, ale nie obciąża intensywnie CPU.
+
+# WORK_RESPONSE_KB - rozmiar dodatkowych danych (w KiB) dołączanych
+# do odpowiedzi HTTP. Pozwala symulować większy ruch sieciowy.
+
+# Od słowa WORK zaczynają się zmienne, które są modyfikowane przez żądania HTTP.
+# Zmiana ich wartości ma miejsce jedynie w obrębie pojedynczego żądania i nie 
+# wpływa na kolejne żądania ani na inne procesy
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    SERVER_PORT=8080 \
+    WORKERS=2 \
+    SERVER_TIMEOUT=60 \
+    WORK_CPU_MS=20 \
+    WORK_MEM_MB=0 \
+    WORK_IO_KB=0 \
+    WORK_SLEEP_MS=0 \
+    WORK_RESPONSE_KB=0
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      bash ca-certificates curl iproute2 iputils-ping net-tools procps \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+COPY flask_app.py start.sh ./
+RUN chmod +x /app/start.sh && mkdir -p /data
+
+EXPOSE 8080 8443
+CMD ["/app/start.sh"]
